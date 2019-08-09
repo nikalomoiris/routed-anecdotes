@@ -3,6 +3,7 @@ import {
   BrowserRouter as Router,
   Route, Link, Redirect, withRouter
 } from 'react-router-dom'
+import Notification from './components/Notification'
 
 const Menu = () => {
   const padding = {
@@ -73,6 +74,7 @@ const CreateNew = (props) => {
       info,
       votes: 0
     })
+    props.history.push('/')
   }
 
   return (
@@ -116,11 +118,20 @@ const App = () => {
     }
   ])
 
-  const [notification, setNotification] = useState('')
+  const CreateNewForm = withRouter(CreateNew)
+
+  const [notificationMessage, setNotificationMessage] = useState(null)
+  const [notifType, setNotifType] = useState('')
 
   const addNew = (anecdote) => {
     anecdote.id = (Math.random() * 10000).toFixed(0)
     setAnecdotes(anecdotes.concat(anecdote))
+    setNotificationMessage(`a new anecdote ${anecdote.content} by ${anecdote.author} added`);
+    setNotifType('info');
+    setTimeout(() => {
+      setNotificationMessage(null);
+      setNotifType(null);
+    }, 5000);
   }
 
   const anecdoteById = (id) =>
@@ -139,13 +150,14 @@ const App = () => {
 
   return (
     <div>
+      <Notification message={notificationMessage} type={notifType} />
       <Router>
         <div>
           <h1>Software anecdotes</h1>
           <Menu />
           <Route exact path="/" render={() => <AnecdoteList anecdotes={anecdotes} />} />
           <Route path="/about" render={() => <About />} />
-          <Route path="/create" render={() => <CreateNew addNew={addNew} />} />
+          <Route path="/create" render={() => <CreateNewForm addNew={addNew} />} />
           <Route exact path="/anecdotes/:id" render={({ match }) =>
             <Anecdote anecdote={anecdoteById(match.params.id)} />
           } />
@@ -156,4 +168,4 @@ const App = () => {
   )
 }
 
-export default App;
+export default App
